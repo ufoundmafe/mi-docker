@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres_db_estres
+    environment:
+      POSTGRES_USER: univalle_user
+      POSTGRES_PASSWORD: univalle_password
+      POSTGRES_DB: univalle_stress_db
+    ports:
+      - "5432:5432"
+    networks:
+      - univalle-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web-estres:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nextjs_web_estres
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://univalle_user:univalle_password@postgres-db:5432/univalle_stress_db
+    networks:
+      - univalle-network
+    depends_on:
+      - postgres-db
+
+  jupyterlab:
+    image: jupyter/datascience-notebook:latest
+    container_name: jupyter_ia_model
+    shm_size: '2gb'
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    networks:
+      - univalle-network
+
+networks:
+  univalle-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

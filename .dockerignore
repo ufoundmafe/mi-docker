@@ -1,0 +1,7 @@
+data/
+node_modules/
+.next/
+.git/
+.env
+pnpm-lock.yaml
+package-lock.json
